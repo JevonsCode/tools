@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>URL编码解码工具</title>
+    <meta
+      name="description"
+      content="简单的URL编码解码工具，支持链接转义和JSON参数处理"
+    />
+    <link rel="canonical" href="" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="URL编码解码工具" />
+    <meta
+      property="og:description"
+      content="简单的URL编码解码工具，支持链接转义和JSON参数处理"
+    />
+    <meta property="og:type" content="website" />
+
+    <style>
+      /** 全局样式 */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+          "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        background: #f5f5f5;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 8px;
+        padding: 30px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 30px;
+        font-size: 24px;
+        font-weight: 500;
+      }
+
+      .tool-section {
+        margin-bottom: 25px;
+        padding: 20px;
+        border: 1px solid #e1e5e9;
+        border-radius: 8px;
+        background: #f8f9fa;
+      }
+
+      .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+      }
+
+      /** 输入框样式 */
+      .input-group {
+        margin-bottom: 15px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+        color: #495057;
+      }
+
+      input[type="text"],
+      textarea {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #dee2e6;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border-color 0.3s ease;
+        resize: vertical;
+      }
+
+      input[type="text"]:focus,
+      textarea:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      textarea {
+        min-height: 80px;
+        font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+        line-height: 1.4;
+      }
+
+      /** 按钮样式 */
+      .btn-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .btn-primary {
+        background: #667eea;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #5a6fd8;
+      }
+
+      .btn-secondary {
+        background: #6c757d;
+        color: white;
+      }
+
+      .btn-secondary:hover {
+        background: #5a6268;
+      }
+
+      .btn-success {
+        background: #28a745;
+        color: white;
+      }
+
+      .btn-success:hover {
+        background: #218838;
+      }
+
+      /** 结果显示样式 */
+      .result-box {
+        background: #ffffff;
+        border: 2px solid #e9ecef;
+        border-radius: 6px;
+        padding: 15px;
+        margin-top: 15px;
+        word-break: break-all;
+        font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .result-box.success {
+        border-color: #28a745;
+        background: #f8fff9;
+      }
+
+      .result-box.error {
+        border-color: #dc3545;
+        background: #fff5f5;
+        color: #dc3545;
+      }
+
+      /** 响应式样式 */
+      @media (max-width: 768px) {
+        .container {
+          margin: 10px;
+          padding: 20px;
+        }
+
+        .btn-group {
+          flex-direction: column;
+        }
+
+        .btn {
+          width: 100%;
+        }
+      }
+
+      /** 提示文本样式 */
+      .help-text {
+        font-size: 12px;
+        color: #6c757d;
+        margin-top: 5px;
+      }
+
+      .copy-btn {
+        background: #17a2b8;
+        color: white;
+        font-size: 12px;
+        padding: 5px 10px;
+        float: right;
+        margin-top: -5px;
+      }
+
+      .copy-btn:hover {
+        background: #138496;
+      }
+
+      /** JSON转换专用样式 */
+      .json-container {
+        position: relative;
+      }
+
+      .json-box {
+        background: #2d3748;
+        color: #e2e8f0;
+        border: 2px solid #4a5568;
+        border-radius: 6px;
+        padding: 15px;
+        margin-top: 15px;
+        font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+        font-size: 13px;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        overflow-x: auto;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .json-box.success {
+        border-color: #38b2ac;
+      }
+
+      .json-box.error {
+        border-color: #f56565;
+        background: #2d1b1b;
+        color: #fed7d7;
+      }
+
+      .json-textarea {
+        background: #2d3748 !important;
+        color: #e2e8f0 !important;
+        border: 2px solid #4a5568 !important;
+        min-height: 150px !important;
+      }
+
+      .json-textarea:focus {
+        border-color: #38b2ac !important;
+      }
+
+      .btn-warning {
+        background: #ffc107;
+        color: #212529;
+      }
+
+      .btn-warning:hover {
+        background: #e0a800;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>URL编码解码工具</h1>
+
+      <!-- URL编码部分 -->
+      <div class="tool-section">
+        <div class="section-title">URL 编码</div>
+
+        <div class="input-group">
+          <label for="originalUrl">原始链接：</label>
+          <input
+            type="text"
+            id="originalUrl"
+            placeholder="请输入需要编码的链接，例如：https://example.com/search?q=中文查询"
+          />
+          <div class="help-text">支持完整URL或URL片段</div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="encodeUrl()">编码</button>
+          <button class="btn btn-secondary" onclick="clearEncode()">
+            清空
+          </button>
+        </div>
+
+        <div id="encodedResult" class="result-box" style="display: none">
+          <button class="btn copy-btn" onclick="copyToClipboard('encodedUrl')">
+            复制
+          </button>
+          <div id="encodedUrl"></div>
+        </div>
+      </div>
+
+      <!-- 编辑转义内容部分 -->
+      <div class="tool-section">
+        <div class="section-title">编辑已编码内容</div>
+
+        <div class="input-group">
+          <label for="editableEncoded">转义后的内容（可编辑）：</label>
+          <textarea
+            id="editableEncoded"
+            placeholder="转义后的内容将显示在这里，您可以直接编辑"
+          ></textarea>
+          <div class="help-text">可以手动修改编码后的内容</div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-success" onclick="regenerateLink()">
+            重新生成
+          </button>
+          <button class="btn btn-secondary" onclick="clearEdit()">清空</button>
+        </div>
+
+        <div id="regeneratedResult" class="result-box" style="display: none">
+          <button
+            class="btn copy-btn"
+            onclick="copyToClipboard('regeneratedUrl')"
+          >
+            复制
+          </button>
+          <div id="regeneratedUrl"></div>
+        </div>
+      </div>
+
+      <!-- URL解码部分 -->
+      <div class="tool-section">
+        <div class="section-title">URL 解码</div>
+
+        <div class="input-group">
+          <label for="encodedInput">编码后的链接：</label>
+          <input
+            type="text"
+            id="encodedInput"
+            placeholder="请输入需要解码的链接，例如：https://example.com/search?q=%E4%B8%AD%E6%96%87"
+          />
+          <div class="help-text">将编码后的URL解码为可读形式</div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="decodeUrl()">解码</button>
+          <button class="btn btn-secondary" onclick="clearDecode()">
+            清空
+          </button>
+        </div>
+
+        <div id="decodedResult" class="result-box" style="display: none">
+          <button class="btn copy-btn" onclick="copyToClipboard('decodedUrl')">
+            复制
+          </button>
+          <div id="decodedUrl"></div>
+        </div>
+      </div>
+
+      <!-- JSON参数转换部分 -->
+      <div class="tool-section">
+        <div class="section-title">JSON 参数转换</div>
+
+        <div class="input-group">
+          <label for="encodedJsonInput">URL编码的JSON参数：</label>
+          <input
+            type="text"
+            id="encodedJsonInput"
+            placeholder="例如：%7B%22a%22%3A1%7D"
+            value=""
+          />
+          <div class="help-text">输入URL编码的JSON字符串</div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="decodeJsonParam()">
+            解码JSON
+          </button>
+          <button class="btn btn-secondary" onclick="clearJsonDecode()">
+            清空
+          </button>
+        </div>
+
+        <div
+          id="jsonDecodedResult"
+          class="json-container"
+          style="display: none"
+        >
+          <button class="btn copy-btn" onclick="copyToClipboard('jsonDecoded')">
+            复制JSON
+          </button>
+          <div id="jsonDecoded" class="json-box"></div>
+        </div>
+      </div>
+
+      <!-- 编辑JSON参数部分 -->
+      <div class="tool-section">
+        <div class="section-title">编辑JSON参数</div>
+
+        <div class="input-group">
+          <label for="editableJson">JSON内容（可编辑）：</label>
+          <textarea
+            id="editableJson"
+            class="json-textarea"
+            placeholder="支持JSON格式或JavaScript对象格式，例如：
+
+JSON格式：
+{
+ 
+}
+
+JavaScript对象格式：
+{
+}"
+          ></textarea>
+          <div class="help-text">支持标准JSON和JavaScript对象语法</div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-success" onclick="encodeJsonParam()">
+            编码为URL参数
+          </button>
+          <button class="btn btn-warning" onclick="validateAndFormat()">
+            验证格式化
+          </button>
+          <button class="btn btn-secondary" onclick="clearJsonEdit()">
+            清空
+          </button>
+        </div>
+
+        <div
+          class="help-text"
+          style="
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            border-left: 3px solid #007bff;
+          "
+        >
+          <strong>支持的JavaScript语法：</strong>
+          无引号属性名、单引号字符串、注释、尾随逗号等
+        </div>
+
+        <div id="jsonEncodedResult" class="result-box" style="display: none">
+          <button class="btn copy-btn" onclick="copyToClipboard('jsonEncoded')">
+            复制
+          </button>
+          <div id="jsonEncoded"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      /** encodeUrl: 将原始链接进行URL编码 */
+      function encodeUrl() {
+        const originalUrl = document.getElementById("originalUrl").value.trim();
+
+        if (!originalUrl) {
+          showError("encodedResult", "请输入需要编码的链接");
+          return;
+        }
+
+        try {
+          // 对URL进行编码，保留协议部分
+          let encodedUrl;
+          if (originalUrl.includes("://")) {
+            // 完整URL的处理
+            const urlParts = originalUrl.split("://");
+            const protocol = urlParts[0] + "://";
+            const restUrl = urlParts[1];
+
+            // 分割域名和路径
+            const domainEndIndex = restUrl.indexOf("/");
+            if (domainEndIndex === -1) {
+              // 只有域名，不编码
+              encodedUrl = originalUrl;
+            } else {
+              const domain = restUrl.substring(0, domainEndIndex);
+              const pathAndQuery = restUrl.substring(domainEndIndex);
+              encodedUrl = protocol + domain + encodeURI(pathAndQuery);
+            }
+          } else {
+            // URL片段的处理
+            encodedUrl = encodeURIComponent(originalUrl);
+          }
+
+          // 显示结果
+          showResult("encodedResult", encodedUrl, "encodedUrl");
+
+          // 同步到编辑区
+          document.getElementById("editableEncoded").value = encodedUrl;
+        } catch (error) {
+          showError("encodedResult", "编码过程中发生错误：" + error.message);
+        }
+      }
+
+      /** decodeUrl: 将编码后的链接进行解码 */
+      function decodeUrl() {
+        const encodedInput = document
+          .getElementById("encodedInput")
+          .value.trim();
+
+        if (!encodedInput) {
+          showError("decodedResult", "请输入需要解码的链接");
+          return;
+        }
+
+        try {
+          const decodedUrl = decodeURIComponent(encodedInput);
+          showResult("decodedResult", decodedUrl, "decodedUrl");
+        } catch (error) {
+          showError("decodedResult", "解码过程中发生错误：" + error.message);
+        }
+      }
+
+      /** regenerateLink: 根据编辑后的内容重新生成链接 */
+      function regenerateLink() {
+        const editableContent = document
+          .getElementById("editableEncoded")
+          .value.trim();
+
+        if (!editableContent) {
+          showError(
+            "regeneratedResult",
+            "编辑区内容为空，请先进行URL编码或手动输入内容"
+          );
+          return;
+        }
+
+        try {
+          // 这里可以进行额外的处理，比如验证URL格式等
+          let processedUrl = editableContent;
+
+          // 检查是否是有效的URL格式
+          if (processedUrl.includes("://") || processedUrl.startsWith("/")) {
+            showResult("regeneratedResult", processedUrl, "regeneratedUrl");
+          } else {
+            // 如果不是完整URL，提示用户
+            showResult("regeneratedResult", processedUrl, "regeneratedUrl");
+          }
+        } catch (error) {
+          showError(
+            "regeneratedResult",
+            "重新生成链接时发生错误：" + error.message
+          );
+        }
+      }
+
+      /** showResult: 显示成功结果 */
+      function showResult(containerId, content, contentId) {
+        const container = document.getElementById(containerId);
+        const contentElement = document.getElementById(contentId);
+
+        contentElement.textContent = content;
+        container.className = "result-box success";
+        container.style.display = "block";
+      }
+
+      /** showError: 显示错误信息 */
+      function showError(containerId, message) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = message;
+        container.className = "result-box error";
+        container.style.display = "block";
+      }
+
+      /** copyToClipboard: 复制内容到剪贴板 */
+      function copyToClipboard(elementId) {
+        const element = document.getElementById(elementId);
+        const text = element.textContent;
+        const btn = event.target;
+        const originalText = btn.textContent;
+
+        // 优先使用现代的 Clipboard API
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard
+            .writeText(text)
+            .then(() => {
+              btn.textContent = "已复制";
+              btn.style.background = "#28a745";
+              setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = "#17a2b8";
+              }, 1500);
+            })
+            .catch(() => {
+              fallbackCopy(text, btn, originalText);
+            });
+        } else {
+          // 降级方案：使用传统的 execCommand
+          fallbackCopy(text, btn, originalText);
+        }
+      }
+
+      function fallbackCopy(text, btn, originalText) {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+          document.execCommand("copy");
+          btn.textContent = "已复制";
+          btn.style.background = "#28a745";
+          setTimeout(() => {
+            btn.textContent = originalText;
+            btn.style.background = "#17a2b8";
+          }, 1500);
+        } catch (err) {
+          btn.textContent = "复制失败";
+          btn.style.background = "#dc3545";
+          setTimeout(() => {
+            btn.textContent = originalText;
+            btn.style.background = "#17a2b8";
+          }, 2000);
+        } finally {
+          document.body.removeChild(textArea);
+        }
+      }
+
+      /** 清空函数 */
+      function clearEncode() {
+        document.getElementById("originalUrl").value = "";
+        document.getElementById("encodedResult").style.display = "none";
+      }
+
+      function clearDecode() {
+        document.getElementById("encodedInput").value = "";
+        document.getElementById("decodedResult").style.display = "none";
+      }
+
+      function clearEdit() {
+        document.getElementById("editableEncoded").value = "";
+        document.getElementById("regeneratedResult").style.display = "none";
+      }
+
+      /** JSON参数转换 */
+
+      /** decodeJsonParam: 解码URL编码的JSON参数 */
+      function decodeJsonParam() {
+        const encodedJsonInput = document
+          .getElementById("encodedJsonInput")
+          .value.trim();
+
+        if (!encodedJsonInput) {
+          showJsonError("jsonDecodedResult", "请输入URL编码的JSON参数");
+          return;
+        }
+
+        try {
+          // 解码URL编码
+          const decodedJson = decodeURIComponent(encodedJsonInput);
+
+          // 尝试解析JSON
+          const jsonObj = JSON.parse(decodedJson);
+
+          // 格式化JSON并添加注释
+          const formattedJson = formatJsonWithComments(jsonObj);
+
+          // 显示结果
+          showJsonResult("jsonDecodedResult", formattedJson, "jsonDecoded");
+
+          // 同步到编辑区
+          document.getElementById("editableJson").value = JSON.stringify(
+            jsonObj,
+            null,
+            4
+          );
+        } catch (error) {
+          showJsonError(
+            "jsonDecodedResult",
+            "解码或解析JSON时发生错误：" + error.message
+          );
+        }
+      }
+
+      /** encodeJsonParam: 将JSON编码为URL参数（支持JS对象语法） */
+      function encodeJsonParam() {
+        const editableJson = document
+          .getElementById("editableJson")
+          .value.trim();
+
+        if (!editableJson) {
+          showError("jsonEncodedResult", "请输入JSON内容或JavaScript对象");
+          return;
+        }
+
+        try {
+          // 支持JavaScript对象格式
+          const jsonObj = parseJavaScriptObject(editableJson);
+
+          // 压缩JSON（去除空格）
+          const compactJson = JSON.stringify(jsonObj);
+
+          // URL编码
+          const encodedJson = encodeURIComponent(compactJson);
+
+          // 显示结果
+          showResult("jsonEncodedResult", encodedJson, "jsonEncoded");
+        } catch (error) {
+          showError("jsonEncodedResult", "格式错误：" + error.message);
+        }
+      }
+
+      /** parseJavaScriptObject: 将JavaScript对象字符串转换为JSON */
+      function parseJavaScriptObject(jsString) {
+        // 移除注释
+        let cleanString = jsString
+          .replace(/\/\*[\s\S]*?\*\//g, "") // 移除多行注释
+          .replace(/\/\/.*$/gm, ""); // 移除单行注释
+
+        // 尝试直接解析JSON
+        try {
+          return JSON.parse(cleanString);
+        } catch (e) {
+          // 如果JSON解析失败，尝试作为JavaScript对象处理
+        }
+
+        try {
+          // 处理JavaScript对象语法
+          // 1. 处理尾随逗号（必须在处理属性名之前）
+          cleanString = cleanString.replace(/,(\s*[}\]])/g, "$1");
+
+          // 2. 处理属性名没有引号的情况
+          cleanString = cleanString.replace(
+            /([{,]\s*)([a-zA-Z_$][a-zA-Z0-9_$]*)\s*:/g,
+            '$1"$2":'
+          );
+
+          // 3. 处理单引号转双引号（在字符串中）
+          cleanString = cleanString.replace(/'([^']*)'/g, '"$1"');
+
+          // 4. 处理undefined值（转换为null）
+          cleanString = cleanString.replace(/:\s*undefined\b/g, ": null");
+
+          // 5. 处理函数值（移除或转换为字符串）
+          cleanString = cleanString.replace(
+            /:\s*function[^,}]*/g,
+            ': "function"'
+          );
+
+          return JSON.parse(cleanString);
+        } catch (error) {
+          // 如果还是失败，尝试使用eval（需要谨慎）
+          try {
+            // 创建一个安全的环境来执行JavaScript代码
+            const result = Function(
+              '"use strict"; return (' + jsString + ")"
+            )();
+            return result;
+          } catch (evalError) {
+            throw new Error("无法解析JavaScript对象: " + evalError.message);
+          }
+        }
+      }
+
+      /** validateAndFormat: 验证并格式化JSON（支持JS对象语法） */
+      function validateAndFormat() {
+        const editableJson = document
+          .getElementById("editableJson")
+          .value.trim();
+
+        if (!editableJson) {
+          alert("请输入JSON内容或JavaScript对象");
+          return;
+        }
+
+        try {
+          // 尝试解析JavaScript对象或JSON
+          const jsonObj = parseJavaScriptObject(editableJson);
+          const formattedJson = JSON.stringify(jsonObj, null, 4);
+          document.getElementById("editableJson").value = formattedJson;
+
+          // 显示成功提示
+          const editableArea = document.getElementById("editableJson");
+          const originalBorder = editableArea.style.borderColor;
+          editableArea.style.borderColor = "#28a745";
+          setTimeout(() => {
+            editableArea.style.borderColor = originalBorder;
+          }, 2000);
+        } catch (error) {
+          alert("格式错误：" + error.message);
+
+          // 显示错误提示
+          const editableArea = document.getElementById("editableJson");
+          const originalBorder = editableArea.style.borderColor;
+          editableArea.style.borderColor = "#dc3545";
+          setTimeout(() => {
+            editableArea.style.borderColor = originalBorder;
+          }, 2000);
+        }
+      }
+
+      /** formatJsonWithComments: 格式化JSON */
+      function formatJsonWithComments(jsonObj) {
+        return JSON.stringify(jsonObj, null, 2);
+      }
+
+      /** JSON结果显示函数 */
+      function showJsonResult(containerId, content, contentId) {
+        const container = document.getElementById(containerId);
+        const contentElement = document.getElementById(contentId);
+
+        contentElement.textContent = content;
+        container.querySelector(".json-box").className = "json-box success";
+        container.style.display = "block";
+      }
+
+      function showJsonError(containerId, message) {
+        const container = document.getElementById(containerId);
+        const contentElement =
+          container.querySelector(".json-box") ||
+          container.querySelector("div");
+
+        contentElement.textContent = message;
+        if (contentElement.classList.contains("json-box")) {
+          contentElement.className = "json-box error";
+        } else {
+          contentElement.className = "result-box error";
+        }
+        container.style.display = "block";
+      }
+
+      /** JSON清空函数 */
+      function clearJsonDecode() {
+        document.getElementById("encodedJsonInput").value = "";
+        document.getElementById("jsonDecodedResult").style.display = "none";
+      }
+
+      function clearJsonEdit() {
+        document.getElementById("editableJson").value = "";
+        document.getElementById("jsonEncodedResult").style.display = "none";
+      }
+
+      // 页面加载完成后的初始化逻辑
+      document.addEventListener("DOMContentLoaded", function () {
+        // 监听输入框回车事件
+        document
+          .getElementById("originalUrl")
+          .addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+              encodeUrl();
+            }
+          });
+
+        document
+          .getElementById("encodedInput")
+          .addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+              decodeUrl();
+            }
+          });
+
+        document
+          .getElementById("encodedJsonInput")
+          .addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+              decodeJsonParam();
+            }
+          });
+
+        // JSON编辑区的快捷键
+        document
+          .getElementById("editableJson")
+          .addEventListener("keydown", function (e) {
+            // Ctrl/Cmd + Enter 进行格式化
+            if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+              e.preventDefault();
+              validateAndFormat();
+            }
+            // Ctrl/Cmd + Shift + Enter 进行编码
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "Enter") {
+              e.preventDefault();
+              encodeJsonParam();
+            }
+          });
+      });
+    </script>
+  </body>
+</html>
